@@ -13,6 +13,7 @@ Ein einfacher Passbild-Editor mit:
 ## Requirements
 - python3
 - python-tk
+- uv
 
 ## 🚀 Installation (mit uv)
 
