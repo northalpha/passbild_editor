@@ -19,7 +19,6 @@ Ein einfacher Passbild-Editor mit:
 
 ```bash
 uv init
-uv venv
 uv add pillow
 uv run passbild.py
 ```
