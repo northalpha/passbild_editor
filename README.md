@@ -10,6 +10,10 @@ Ein einfacher Passbild-Editor mit:
 
 ---
 
+## Requirements
+- python3
+- python-tk
+
 ## 🚀 Installation (mit uv)
 
 ```bash
