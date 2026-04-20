@@ -7,6 +7,7 @@ Ein einfacher Passbild-Editor mit:
 - Rotation ±90°
 - Fixes Passbild-Overlay (Ratio 1.3)
 - Export als Crop-Datei
+- Auto Rotation beim Import der Bilder
 
 ---
 
