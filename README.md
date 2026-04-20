@@ -1,4 +1,4 @@
-‚# 📸 Passbild Editor (Python)
+# 📸 Passbild Editor (Python)
 
 Ein einfacher Passbild-Editor mit:
 
