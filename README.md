@@ -15,7 +15,7 @@ Ein einfacher Passbild-Editor mit:
 - python-tk
 - uv
 
-## 🚀 Installation (mit uv)
+## 🚀 Ausführung (mit uv)
 
 ```bash
 uv run --script passbild.py
