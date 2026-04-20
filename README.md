@@ -1,4 +1,4 @@
-# 📸 Passbild Editor (Python)
+‚# 📸 Passbild Editor (Python)
 
 Ein einfacher Passbild-Editor mit:
 
@@ -10,14 +10,6 @@ Ein einfacher Passbild-Editor mit:
 
 ---
 
-<<<<<<< HEAD
-## 🚀 Installation (mit uv)
-
-```bash
-uv venv
-uv add pillow
-uv run passbild.py
-=======
 ## Requirements
 - python3
 - python-tk
@@ -28,4 +20,3 @@ uv run passbild.py
 ```bash
 uv run --script passbild.py
 ```
->>>>>>> 07204bc13acab159ce96d17ad77be57a4f9e051a

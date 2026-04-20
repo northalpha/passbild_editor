@@ -1,13 +1,6 @@
-<<<<<<< HEAD
 import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk, ImageOps
-=======
-#!/usr/bin/env python3
-import tkinter as tk
-from tkinter import filedialog
-from PIL import Image, ImageTk
->>>>>>> 07204bc13acab159ce96d17ad77be57a4f9e051a
 import os
 
 TARGET_RATIO = 1.3
@@ -56,26 +49,18 @@ class App:
         self.canvas.bind("<B1-Motion>", self.drag_move)
 
     def load(self):
-<<<<<<< HEAD
         path = filedialog.askopenfilename(
             filetypes=[("Images", "*.jpg *.jpeg *.png")]
         )
-=======
-        path = filedialog.askopenfilename(filetypes=[("Images", "*.jpg *.jpeg *.png")])
->>>>>>> 07204bc13acab159ce96d17ad77be57a4f9e051a
         if not path:
             return
 
         self.path = path
-<<<<<<< HEAD
 
         img = Image.open(path)
         img = ImageOps.exif_transpose(img)  # 🔑 Auto-Rotation
 
         self.base_img = img
-=======
-        self.base_img = Image.open(path)
->>>>>>> 07204bc13acab159ce96d17ad77be57a4f9e051a
 
         self.reset()
         self.apply()
