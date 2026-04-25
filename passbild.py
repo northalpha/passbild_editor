@@ -11,7 +11,6 @@ class App:
         self.root = root
         self.root.title("Passbild Editor")
 
-        # ⛔ verhindert minimieren unter Layoutgröße
         self.root.minsize(600, 700)
 
         self.canvas = tk.Canvas(root, width=500, height=650, bg="gray")
@@ -21,6 +20,10 @@ class App:
         bar.pack()
 
         tk.Button(bar, text="📂 Load", command=self.load).pack(side="left")
+        tk.Button(bar, text="❌ Close", command=self.close_image).pack(side="left")
+        tk.Button(bar, text="↩ Undo", command=self.undo).pack(side="left")
+        tk.Button(bar, text="⟳ Reset", command=self.reset_view).pack(side="left")
+
         tk.Button(bar, text="🔍 +", command=lambda: self.zoom(1.1)).pack(side="left")
         tk.Button(bar, text="🔍 -", command=lambda: self.zoom(0.9)).pack(side="left")
         tk.Button(bar, text="↺", command=self.rotate_left).pack(side="left")
@@ -44,9 +47,14 @@ class App:
         self.frame_y = 200
 
         self.dragging = False
+        self.history = []
 
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.drag_move)
+
+    # ------------------------
+    # LOAD / RESET
+    # ------------------------
 
     def load(self):
         path = filedialog.askopenfilename(
@@ -58,7 +66,7 @@ class App:
         self.path = path
 
         img = Image.open(path)
-        img = ImageOps.exif_transpose(img)  # 🔑 Auto-Rotation
+        img = ImageOps.exif_transpose(img)
 
         self.base_img = img
 
@@ -76,50 +84,104 @@ class App:
             650 / self.base_img.height
         )
 
+    def reset_view(self):
+        if not self.base_img:
+            return
+        self.reset()
+        self.apply()
+
+    def close_image(self):
+        self.base_img = None
+        self.img = None
+        self.path = None
+        self.canvas.delete("all")
+
+    # ------------------------
+    # HISTORY (UNDO)
+    # ------------------------
+
+    def save_state(self):
+        self.history.append((
+            self.offset_x,
+            self.offset_y,
+            self.zoom_level,
+            self.rotation
+        ))
+        if len(self.history) > 20:
+            self.history.pop(0)
+
+    def undo(self):
+        if not self.history:
+            return
+
+        self.offset_x, self.offset_y, self.zoom_level, self.rotation = self.history.pop()
+        self.apply()
+
+    # ------------------------
+    # TRANSFORM
+    # ------------------------
+
     def rotate_left(self):
+        self.save_state()
         self.rotation = (self.rotation - 90) % 360
         self.apply()
 
     def rotate_right(self):
+        self.save_state()
         self.rotation = (self.rotation + 90) % 360
         self.apply()
 
     def zoom(self, f):
+        self.save_state()
         self.zoom_level *= f
         self.apply()
 
     def apply(self):
+        if not self.base_img:
+            return
+
         img = self.base_img.rotate(-self.rotation, expand=True)
 
         w = int(img.width * self.scale * self.zoom_level)
         h = int(img.height * self.scale * self.zoom_level)
 
         self.img = img.resize((w, h))
-
         self.tk = ImageTk.PhotoImage(self.img)
 
+        self.clamp_offsets()
         self.render()
 
-    def render(self):
-        self.canvas.delete("all")
+    # ------------------------
+    # DRAGGING (BEGRENZT)
+    # ------------------------
 
-        self.canvas.create_image(
-            self.offset_x,
-            self.offset_y,
-            anchor="nw",
-            image=self.tk
-        )
+    def clamp_offsets(self):
+        if not self.img:
+            return
 
-        self.canvas.create_rectangle(
-            self.frame_x,
-            self.frame_y,
-            self.frame_x + self.frame_w,
-            self.frame_y + self.frame_h,
-            outline="red",
-            width=3
-        )
+        img_w, img_h = self.img.size
+
+        min_x = self.frame_x + self.frame_w - img_w
+        max_x = self.frame_x
+
+        min_y = self.frame_y + self.frame_h - img_h
+        max_y = self.frame_y
+
+        # Falls Bild kleiner als Frame → zentrieren
+        if img_w < self.frame_w:
+            self.offset_x = self.frame_x + (self.frame_w - img_w) // 2
+        else:
+            self.offset_x = max(min(self.offset_x, max_x), min_x)
+
+        if img_h < self.frame_h:
+            self.offset_y = self.frame_y + (self.frame_h - img_h) // 2
+        else:
+            self.offset_y = max(min(self.offset_y, max_y), min_y)
 
     def start_drag(self, e):
+        if not self.img:
+            return
+        self.save_state()
         self.dragging = True
         self.lx = e.x
         self.ly = e.y
@@ -137,7 +199,36 @@ class App:
         self.lx = e.x
         self.ly = e.y
 
+        self.clamp_offsets()
         self.render()
+
+    # ------------------------
+    # RENDER
+    # ------------------------
+
+    def render(self):
+        self.canvas.delete("all")
+
+        if self.img:
+            self.canvas.create_image(
+                self.offset_x,
+                self.offset_y,
+                anchor="nw",
+                image=self.tk
+            )
+
+        self.canvas.create_rectangle(
+            self.frame_x,
+            self.frame_y,
+            self.frame_x + self.frame_w,
+            self.frame_y + self.frame_h,
+            outline="red",
+            width=3
+        )
+
+    # ------------------------
+    # EXPORT
+    # ------------------------
 
     def export(self):
         if not self.base_img:
@@ -158,7 +249,6 @@ class App:
         out = base + "_cropped.jpg"
 
         cropped.save(out)
-
         print("✔ saved:", out)
 
 
